@@ -51,10 +51,10 @@ vars = d/total_var
 dev.new()
 plot(vars,type='l')
 
-#training the model by using 20-60 principle componenets and comparing the performance on test data
+#training the model by using 20-60 principle components and comparing the performance on test data
 train_accuracies = c()
 test_accuracies = c()
-for (k in 10:60){
+for (k in 20:60){
   x_train = X_train %*% U[1:n,1:k]
   x_test = X_test %*% U[1:n,1:k]
   # Initializing Weights and bia
@@ -67,7 +67,7 @@ for (k in 10:60){
   }
   
   #Loss Function
-  loss_func <- function(y,h,W,lamda,m=60){
+  loss_func <- function(y,h,W,lamda,m){
     (-1/m)*(sum(y*log(h) + (1-y)*log(1-h))) + (lamda/(2*m))*sum(W^2)
   }
   
@@ -77,18 +77,18 @@ for (k in 10:60){
   for (i in 1:1000){
     z = x_train %*% W + b
     h = sigmoid(z)
-    W = W - (lr/60)*((t(x_train) %*% (h - y_train)) + lamda*W)
-    b = b - (lr/60)*sum(h - y_train)
+    W = W - (lr/length(y_train))*((t(x_train) %*% (h - y_train)) + lamda*W)
+    b = b - (lr/length(y_train))*sum(h - y_train)
   }
   #accuracy on train and test sets
   preds_train = sigmoid(x_train%*%W+b)
   preds_train[preds_train>0.5] = 1
   preds_train[preds_train<=0.5] = 0
-  train_accuracy = sum(preds_train==y_train)/m
+  train_accuracy = 100*sum(preds_train==y_train)/m
   preds_test = sigmoid(x_test%*%W+b)
   preds_test[preds_test>0.5] = 1
   preds_test[preds_test<=0.5] = 0
-  test_accuracy = sum(preds_test==y_test)/length(y_test)
+  test_accuracy = 100*sum(preds_test==y_test)/length(y_test)
   train_accuracies = c(train_accuracies,train_accuracy)
   test_accuracies = c(test_accuracies,test_accuracy)
   print(paste("For first",k,"Principle Components:"))
@@ -98,3 +98,43 @@ for (k in 10:60){
 }
 #Selecting the number of components which gave max accuracy on test set
 k = which.max(test_accuracies) + 10 -1
+
+k_bag = c(20:30)
+preds = c()
+for (k in k_bag){
+  x_train = X_train %*% U[1:n,1:k]
+  x_test = X_test %*% U[1:n,1:k]
+  # Initializing Weights and bia
+  W = array(0,c(k,1))
+  b = 0
+  
+  #Sigmoid Function
+  sigmoid <- function(z){
+    1/(1+exp(-z))
+  }
+  
+  #Loss Function
+  loss_func <- function(y,h,W,lamda,m){
+    (-1/m)*(sum(y*log(h) + (1-y)*log(1-h))) + (lamda/(2*m))*sum(W^2)
+  }
+  
+  #Gradient Descent
+  lr = 0.01
+  lamda = 0.5
+  for (i in 1:1000){
+    z = x_train %*% W + b
+    h = sigmoid(z)
+    W = W - (lr/length(y_train))*((t(x_train) %*% (h - y_train)) + lamda*W)
+    b = b - (lr/length(y_train))*sum(h - y_train)
+  }
+  #accuracy on train and test sets
+  preds_train = sigmoid(x_train%*%W+b)
+  preds_train[preds_train>0.5] = 1
+  preds_train[preds_train<=0.5] = 0
+  train_accuracy = 100*sum(preds_train==y_train)/m
+  preds_test = sigmoid(x_test%*%W+b)
+  preds_test[preds_test>0.5] = 1
+  preds_test[preds_test<=0.5] = 0
+  preds = c(preds,preds_test)
+  
+}

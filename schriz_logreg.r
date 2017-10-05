@@ -9,13 +9,15 @@ sigmoid <- function(z){
 }
 
 #Loss Function
-loss_func <- function(y,h,W,lamda,m=60){
+loss_func <- function(y,h,W,lamda,m){
   (-1/m)*(sum(y*log(h) + (1-y)*log(1-h))) + (lamda/(2*m))*sum(W^2)
 }
 logistic_model <- function(X,y){
   sample = sample.int(n = nrow(X), size = floor(.6*nrow(X)), replace = F)
   X_train = X[sample,]
   X_test = X[-sample,]
+  y_train = y[sample,]
+  y_test = y[-sample,]
   m = dim(X)[1]
   n = dim(X)[2]
   # Initializing Weights and bia
@@ -27,13 +29,13 @@ logistic_model <- function(X,y){
   lamda = 0.5
   losses = c()
   accuracies = c()
-  for (i in 1:1000){
+  for (i in 1:15000){
     z = X_train %*% W + b
     h = sigmoid(z)
     W = W - (lr/m)*((t(X_train) %*% (h - y_train)) + lamda*W)
     b = b - (lr/m)*sum(h - y_train)
     if (i%%10 == 0){
-      loss = loss_func(y_train,h,W,lamda)
+      loss = loss_func(y_train,h,W,lamda,length(y_train))
       losses = c(losses,loss)
     }
   }
@@ -66,9 +68,9 @@ colnames(X2) <- NULL
 
 #Taking both SBM and FNC data
 X_full <- cbind(X1,X2)
-m = dim(X)[1]
-n = dim(X)[2]
-colnames(X) <- NULL
+m = dim(X_full)[1]
+n = dim(X_full)[2]
+colnames(X_full) <- NULL
 
 logistic_model(X1,y)
 logistic_model(X2,y)

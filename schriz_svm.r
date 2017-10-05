@@ -59,10 +59,10 @@ data_frr = cbind(X,y)
 data_frr = data.frame(data_frr)
 
 print("Taking SBM features only")
-svm_model(data_fr1,"svmPoly")
+svm_model(data_fr1)
 
 print("Taking FNC features only")
-svm_model(data_fr2,"svmPoly")
+svm_model(data_fr2)
 
 print("Taking both features")
-svm_model(data_frr,"svmPoly")
+svm_model(data_frr)
